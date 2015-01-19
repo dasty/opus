@@ -351,6 +351,80 @@ AM_CONDITIONAL([OPUS_ARM_EXTERNAL_ASM],
 AM_CONDITIONAL([HAVE_SSE4_1], [false])
 AM_CONDITIONAL([HAVE_SSE2], [false])
 
+AC_DEFUN([OPUS_PATH_NE10],
+   [
+      AC_ARG_WITH(NE10,
+                  AC_HELP_STRING([--with-NE10=PFX],[Prefix where libNE10 is installed (optional)]),
+                  NE10_prefix="$withval", NE10_prefix="")
+      AC_ARG_WITH(NE10-libraries,
+                  AC_HELP_STRING([--with-NE10-libraries=DIR],
+                        [Directory where libNE10 library is installed (optional)]),
+                  NE10_libraries="$withval", NE10_libraries="")
+      AC_ARG_WITH(NE10-includes,
+                  AC_HELP_STRING([--with-NE10-includes=DIR],
+                                 [Directory where libNE10 header files are installed (optional)]),
+                  NE10_includes="$withval", ogg_includes="")
+
+      if test "x$NE10_libraries" != "x" ; then
+         NE10_LIBS="-L$NE10_libraries"
+      elif test "x$NE10_prefix" = "xno" || test "x$NE10_prefix" = "xyes" ; then
+         NE10_LIBS=""
+      elif test "x$NE10_prefix" != "x" ; then
+         NE10_LIBS="-L$NE10_prefix/lib"
+      elif test "x$prefix" != "xNONE" ; then
+         NE10_LIBS="-L$prefix/lib"
+      fi
+
+      if test "x$NE10_prefix" != "xno" ; then
+         NE10_LIBS="$NE10_LIBS -lNE10"
+      fi
+
+      if test "x$NE10_includes" != "x" ; then
+         NE10_CFLAGS="-I$NE10_includes"
+      elif test "x$NE10_prefix" = "xno" || test "x$NE10_prefix" = "xyes" ; then
+         NE10_CFLAGS=""
+      elif test "x$ogg_prefix" != "x" ; then
+         NE10_CFLAGS="-I$NE10_prefix/include"
+      elif test "x$prefix" != "xNONE"; then
+         NE10_CFLAGS="-I$prefix/include"
+      fi
+
+      AC_MSG_CHECKING(for NE10)
+      save_CFLAGS="$CFLAGS"; CFLAGS="$NE10_CFLAGS"
+      save_LIBS="$LIBS"; LIBS="$NE10_LIBS"
+      AC_LINK_IFELSE(
+         [
+            AC_LANG_PROGRAM(
+               [[#include <NE10_init.h>
+               ]],
+               [[
+                  ne10_fft_cfg_float32_t cfg;
+                  cfg = ne10_fft_alloc_c2c_float32_neon(480);
+               ]]
+            )
+         ],[
+            HAVE_ARM_NE10=1
+            AC_MSG_RESULT([yes])
+         ],[
+            HAVE_ARM_NE10=0
+            AC_MSG_RESULT([no])
+            NE10_CFLAGS=""
+            NE10_LIBS=""
+         ]
+      )
+      CFLAGS="$save_CFLAGS"; LIBS="$save_LIBS"
+      #Now we know if libNE10 is installed or not
+      AS_IF([test x"$HAVE_ARM_NE10" = x"1"],
+         [
+            AC_DEFINE([HAVE_ARM_NE10], 1, [NE10 library is installed on host. Make sure it is on target!])
+            AC_SUBST(HAVE_ARM_NE10)
+            AC_SUBST(NE10_CFLAGS)
+            AC_SUBST(NE10_LIBS)
+         ],[]
+      )
+   ]
+)
+
 AS_IF([test x"$enable_intrinsics" = x"yes"],[
    case $host_cpu in
    arm*)
@@ -391,6 +465,10 @@ AS_IF([test x"$enable_intrinsics" = x"yes"],[
             AC_DEFINE([OPUS_ARM_MAY_HAVE_EDSP], 1, [Define if compiler support EDSP Instructions])
             AC_DEFINE([OPUS_ARM_MAY_HAVE_MEDIA], 1, [Define if compiler support MEDIA Instructions])
             AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON], 1, [Define if compiler support NEON instructions])
+
+            OPUS_PATH_NE10()
+            AS_IF([test x"$NE10_LIBS" != "x"],
+                  [enable_intrinsics="$enable_intrinsics NE10"],[])
          ],
          [
             AC_MSG_WARN([Compiler does not support ARM intrinsics])
@@ -516,6 +594,9 @@ AS_IF([test x"$enable_intrinsics" = x"yes"],[
 AM_CONDITIONAL([CPU_ARM], [test "$cpu_arm" = "yes"])
 AM_CONDITIONAL([OPUS_ARM_NEON_INTR],
     [test x"$OPUS_ARM_NEON_INTR" = x"1"])
+AM_CONDITIONAL([HAVE_ARM_NE10],
+    [test x"$HAVE_ARM_NE10" = x"1"])
+
 
 AS_IF([test x"$enable_rtcd" = x"yes"],[
     AS_IF([test x"$rtcd_support" != x"no"],[

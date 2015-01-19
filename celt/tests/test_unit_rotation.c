@@ -46,6 +46,8 @@
 #include "bands.h"
 #include "pitch.c"
 #include "celt_lpc.c"
+#include "kiss_fft.c"
+#include "mdct.c"
 #include <math.h>
 
 #if defined(OPUS_X86_MAY_HAVE_SSE4_1) || defined(OPUS_X86_MAY_HAVE_SSE2)
@@ -58,6 +60,10 @@
        || defined(OPUS_ARM_NEON_INTR))
 #if defined(OPUS_ARM_NEON_INTR)
 #include "arm/celt_neon_intr.c"
+#endif
+#if defined(HAVE_ARM_NE10)
+#include "arm/celt_ne10_fft.c"
+#include "arm/celt_ne10_mdct.c"
 #endif
 #include "arm/arm_celt_map.c"
 #endif
