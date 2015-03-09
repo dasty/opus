@@ -49,7 +49,7 @@
 #include "entcode.c"
 
 #if defined(OPUS_HAVE_RTCD) && \
-         (defined(OPUS_ARM_ASM) || defined(OPUS_ARM_NEON_INTR))
+         (defined(OPUS_ARM_ASM) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR))
 #include "arm/armcpu.c"
 #if defined(HAVE_ARM_NE10)
 #include "arm/celt_ne10_fft.c"
@@ -60,6 +60,8 @@
 
 #elif defined(OPUS_X86_MAY_HAVE_SSE2) || defined(OPUS_X86_MAY_HAVE_SSE4_1)
 #include "x86/x86cpu.c"
+#include "celt/x86/pitch_sse.c"
+#include "x86/x86_celt_map.c"
 #endif
 
 #ifndef M_PI
