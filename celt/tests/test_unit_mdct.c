@@ -48,8 +48,7 @@
 #include "mathops.c"
 #include "entcode.c"
 
-#if defined(OPUS_HAVE_RTCD) && \
-         (defined(OPUS_ARM_ASM) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR))
+#if defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
 #include "arm/armcpu.c"
 #if defined(HAVE_ARM_NE10)
 #include "arm/celt_ne10_fft.c"

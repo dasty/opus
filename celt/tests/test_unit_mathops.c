@@ -67,14 +67,12 @@
 #include "x86/celt_lpc_sse.c"
 #endif
 #include "x86/x86_celt_map.c"
-#elif ((defined(OPUS_ARM_ASM) && defined(FIXED_POINT)) \
-       || defined(OPUS_ARM_NEON_INTR))
-#if defined(OPUS_ARM_NEON_INTR)
+
+#elif defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
 #include "arm/celt_neon_intr.c"
 #if defined(HAVE_ARM_NE10)
 #include "arm/celt_ne10_fft.c"
 #include "arm/celt_ne10_mdct.c"
-#endif
 #endif
 #include "arm/arm_celt_map.c"
 #endif

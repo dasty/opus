@@ -32,6 +32,7 @@
 #include <arm_neon.h>
 #include "../pitch.h"
 
+#if !defined(FIXED_POINT)
 /*
  * Function: xcorr_kernel_neon_float
  * ---------------------------------
@@ -243,3 +244,4 @@ void celt_pitch_xcorr_float_neon(const opus_val16 *_x, const opus_val16 *_y,
             (const float32_t *)_y+i, (float32_t *)xcorr+i, len);
    }
 }
+#endif

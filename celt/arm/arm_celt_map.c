@@ -44,7 +44,7 @@ opus_val32 (*const CELT_PITCH_XCORR_IMPL[OPUS_ARCHMASK+1])(const opus_val16 *,
   MAY_HAVE_NEON(celt_pitch_xcorr)   /* NEON */
 };
 # else /* !FIXED_POINT */
-#  if defined(OPUS_ARM_NEON_INTR)
+#  if defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
 void (*const CELT_PITCH_XCORR_IMPL[OPUS_ARCHMASK+1])(const opus_val16 *,
     const opus_val16 *, opus_val32 *, int, int) = {
   celt_pitch_xcorr_c,              /* ARMv4 */
@@ -113,7 +113,7 @@ void (*const CLT_MDCT_BACKWARD_IMPL[OPUS_ARCHMASK+1])(const mdct_lookup *l,
 };
 
 #endif /* HAVE_ARM_NE10 */
-#  endif /* OPUS_ARM_NEON_INTR */
+#  endif /* OPUS_ARM_MAY_HAVE_NEON_INTR */
 # endif /* FIXED_POINT */
 
 #endif /* OPUS_HAVE_RTCD */

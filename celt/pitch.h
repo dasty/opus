@@ -46,8 +46,7 @@
 #include "mips/pitch_mipsr1.h"
 #endif
 
-#if ((defined(OPUS_ARM_ASM) && defined(FIXED_POINT)) \
-  || defined(OPUS_ARM_NEON_INTR))
+#if (defined(OPUS_ARM_ASM) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR))
 # include "arm/pitch_arm.h"
 #endif
 
@@ -189,7 +188,7 @@ celt_pitch_xcorr_c(const opus_val16 *_x, const opus_val16 *_y,
 #if !defined(OVERRIDE_PITCH_XCORR)
 /*Is run-time CPU detection enabled on this platform?*/
 # if defined(OPUS_HAVE_RTCD) && \
-  (defined(OPUS_ARM_ASM) || (defined(OPUS_ARM_NEON_INTR) && !defined(OPUS_ARM_PRESUME_NEON_INTR)))
+  (defined(OPUS_ARM_ASM) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR))
 extern
 #  if defined(FIXED_POINT)
 opus_val32

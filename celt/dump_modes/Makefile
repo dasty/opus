@@ -15,7 +15,7 @@ SOURCES = dump_modes.c \
 ifdef HAVE_ARM_NE10
 CC = gcc
 CFLAGS += -mfpu=neon
-INCLUDES += -I$(NE10_INCDIR) -DHAVE_ARM_NE10 -DOPUS_ARM_NEON_INTR
+INCLUDES += -I$(NE10_INCDIR) -DHAVE_ARM_NE10 -DOPUS_ARM_PRESUME_NEON_INTR
 LIBDIR = -l:$(NE10_LIBDIR)/libNE10.so
 SOURCES += ../arm/celt_ne10_fft.c \
            dump_modes_arm_ne10.c \

@@ -44,6 +44,7 @@
 #include "os_support.h"
 #include "stack_alloc.h"
 
+#if !defined(FIXED_POINT)
 #ifdef CUSTOM_MODES
 
 /* nfft lengths in NE10 that support scaled fft */
@@ -144,3 +145,4 @@ void opus_ifft_float_neon(const kiss_fft_state *st,
    }
    RESTORE_STACK;
 }
+#endif /* !defined(FIXED_POINT) */

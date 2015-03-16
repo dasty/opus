@@ -444,7 +444,7 @@ AC_DEFUN([OPUS_PATH_NE10],
 AS_IF([test x"$enable_intrinsics" = x"yes"],[
    intrinsics_support=""
    AS_CASE([$host_cpu],
-   [arm*],
+   [arm*|aarch64],
    [
       cpu_arm=yes
       OPUS_CHECK_INTRINSICS(
@@ -459,55 +459,50 @@ AS_IF([test x"$enable_intrinsics" = x"yes"],[
             SUMM = vmlaq_f32(SUMM, A0, A1);
          ]]
       )
-      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
-          [
-             OPUS_ARM_NEON_INTR_CFLAGS="$ARM_NEON_INTR_CFLAGS"
-             AC_SUBST([OPUS_ARM_NEON_INTR_CFLAGS])
-          ]
+
+      AS_CASE([$host_cpu],
+         [arm*],
+         [
+            AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"],
+                  [
+                     OPUS_ARM_NEON_INTR_CFLAGS="$ARM_NEON_INTR_CFLAGS"
+                     AC_SUBST([OPUS_ARM_NEON_INTR_CFLAGS])
+                     dnl Don't see why defining these is necessary to check features at runtime
+                     AC_DEFINE([OPUS_ARM_MAY_HAVE_EDSP], 1, [Define if compiler support EDSP Instructions])
+                     AC_DEFINE([OPUS_ARM_MAY_HAVE_MEDIA], 1, [Define if compiler support MEDIA Instructions])
+                     AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON], 1, [Define if compiler support NEON instructions])
+                  ]
+            )
+         ]
       )
 
-      #Currently we only have intrinsic optimizations for floating point
-      AS_IF([test x"$enable_float" = x"yes"],
+      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"],
       [
-         AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"],
-         [
-            OPUS_ARM_NEON_INTR=1
-            AC_DEFINE([OPUS_ARM_NEON_INTR], 1,
-                      [Support ARMv7 Neon Intrinsics for float])
-            AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON_INTR], 1,
-                      [Compiler supports ARMv7 Neon Intrinsics])
-            intrinsics_support="$intrinsics_support (Neon_Intrinsics)"
+         AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON_INTR], 1,
+                   [Compiler supports ARMv7 Neon Intrinsics])
+         intrinsics_support="$intrinsics_support (Neon_Intrinsics)"
 
-            AS_IF([test x"enable_rtcd" != x"" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
-                  [rtcd_support="$rtcd_support (ARMv7_Neon_Intrinsics)"],[])
+         AS_IF([test x"enable_rtcd" != x"" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
+               [rtcd_support="$rtcd_support (ARMv7_Neon_Intrinsics)"],[])
 
-            AS_IF([test x"$OPUS_ARM_PRESUME_NEON_INTR" = x"1"],
-                  [AC_DEFINE([OPUS_ARM_PRESUME_NEON_INTR], 1,
-                             [Define if binary requires NEON intrinsics support])])
+         AS_IF([test x"$OPUS_ARM_PRESUME_NEON_INTR" = x"1"],
+               [AC_DEFINE([OPUS_ARM_PRESUME_NEON_INTR], 1,
+                          [Define if binary requires NEON intrinsics support])])
 
-			   AS_IF([test x"$rtcd_support" = x""],
-                  [rtcd_support=no])
+         AS_IF([test x"$rtcd_support" = x""],
+               [rtcd_support=no])
 
-            AS_IF([test x"$intrinsics_support" = x""],
-                  [intrinsics_support=no],
-			         [intrinsics_support="arm$intrinsics_support"])
+         AS_IF([test x"$intrinsics_support" = x""],
+               [intrinsics_support=no],
+               [intrinsics_support="arm$intrinsics_support"])
 
-            dnl Don't see why defining these is necessary to check features at runtime
-            AC_DEFINE([OPUS_ARM_MAY_HAVE_EDSP], 1, [Define if compiler support EDSP Instructions])
-            AC_DEFINE([OPUS_ARM_MAY_HAVE_MEDIA], 1, [Define if compiler support MEDIA Instructions])
-            AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON], 1, [Define if compiler support NEON instructions])
-
-            OPUS_PATH_NE10()
-            AS_IF([test x"$HAVE_ARM_NE10" = x"1"],
-                  [intrinsics_support="$intrinsics_support NE10"],[])
-         ],
-         [
-            AC_MSG_WARN([Compiler does not support ARM intrinsics])
-            intrinsics_support=no
-         ])
-      ], [
-            AC_MSG_WARN([Currently only have ARM intrinsics for float])
-            intrinsics_support=no
+         OPUS_PATH_NE10()
+         AS_IF([test x"$HAVE_ARM_NE10" = x"1"],
+               [intrinsics_support="$intrinsics_support NE10"],[])
+      ],
+      [
+         AC_MSG_WARN([Compiler does not support ARM intrinsics])
+         intrinsics_support=no
       ])
    ],
    [i?86|x86_64],
@@ -663,8 +658,8 @@ AS_IF([test x"$enable_intrinsics" = x"yes"],[
 ])
 
 AM_CONDITIONAL([CPU_ARM], [test "$cpu_arm" = "yes"])
-AM_CONDITIONAL([OPUS_ARM_NEON_INTR],
-    [test x"$OPUS_ARM_NEON_INTR" = x"1"])
+AM_CONDITIONAL([HAVE_ARM_NEON_INTR],
+    [test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"])
 AM_CONDITIONAL([HAVE_ARM_NE10],
     [test x"$HAVE_ARM_NE10" = x"1"])
 

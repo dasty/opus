@@ -43,6 +43,8 @@
 #include "os_support.h"
 #include "stack_alloc.h"
 
+#if !defined(FIXED_POINT)
+
 void clt_mdct_forward_float_neon(const mdct_lookup *l,
                                  kiss_fft_scalar *in,
                                  kiss_fft_scalar * OPUS_RESTRICT out,
@@ -258,3 +260,4 @@ void clt_mdct_backward_float_neon(const mdct_lookup *l,
    }
    RESTORE_STACK;
 }
+#endif /* !defined(FIXED_POINT) */
