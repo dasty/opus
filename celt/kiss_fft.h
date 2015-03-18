@@ -140,7 +140,7 @@ kiss_fft_state *opus_fft_alloc(int nfft,void * mem,size_t * lenmem, int arch);
     f[k].r and f[k].i
  * */
 void opus_fft_c(const kiss_fft_state *cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout);
-void opus_ifft(const kiss_fft_state *cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout);
+void opus_ifft_c(const kiss_fft_state *cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout);
 
 void opus_fft_impl(const kiss_fft_state *st,kiss_fft_cpx *fout);
 void opus_ifft_impl(const kiss_fft_state *st,kiss_fft_cpx *fout);
@@ -169,6 +169,13 @@ void (*const OPUS_FFT[OPUS_ARCHMASK+1])(const kiss_fft_state *cfg,
                                         kiss_fft_cpx *fout);
 #define opus_fft(_cfg, _fin, _fout, arch) \
    ((*OPUS_FFT[(arch)&OPUS_ARCHMASK])(_cfg, _fin, _fout))
+
+void (*const OPUS_IFFT[OPUS_ARCHMASK+1])(const kiss_fft_state *cfg,
+                                         const kiss_fft_cpx *fin,
+                                         kiss_fft_cpx *fout);
+#define opus_ifft(_cfg, _fin, _fout, arch) \
+   ((*OPUS_IFFT[(arch)&OPUS_ARCHMASK])(_cfg, _fin, _fout))
+
 #else /* else for if defined(OPUS_HAVE_RTCD) && (defined(HAVE_ARM_NE10)) */
 
 #define opus_fft_alloc_arch(_st, arch) \
@@ -179,6 +186,10 @@ void (*const OPUS_FFT[OPUS_ARCHMASK+1])(const kiss_fft_state *cfg,
 
 #define opus_fft(_cfg, _fin, _fout, arch) \
          ((void)(arch), opus_fft_c(_cfg, _fin, _fout))
+
+#define opus_ifft(_cfg, _fin, _fout, arch) \
+         ((void)(arch), opus_ifft_c(_cfg, _fin, _fout))
+
 #endif /* end if defined(OPUS_HAVE_RTCD) && (defined(HAVE_ARM_NE10)) */
 #endif /* end if !defined(OVERRIDE_OPUS_FFT) */
 
